@@ -15,12 +15,13 @@ global ConfigFile := A_ScriptDir "\config.ini"
 global Lang := "vi"
 global PasteKey := "F9"
 global BackKey := "F10"
+global AutoKey := "F11"
 global Queue := []
 global CurrentIndex := 1
 global LastClip := ""
 global IsPasting := false
 global IsAutoPasting := false
-global PasteDelay := 100
+global PasteDelay := 0.1
 global SkipEmpty := 1
 global AutoSepKey := "Tab"
 global History := []
@@ -65,10 +66,11 @@ BuildTexts() {
     t["vi.trayExit"]     := "Thoát"
     t["vi.warnAdmin"]    := "Nếu phím lỗi: Chạy Admin"
     t["vi.delay"]        := "Nghỉ:"
-    t["vi.ms"]           := "ms"
+    t["vi.sec"]           := "giây"
     t["vi.skipEmpty"]    := "Bỏ dòng trống"
     t["vi.loadFile"]     := "📂 File"
     t["vi.autoMode"]     := "⚡ Tự động"
+    t["vi.labelAuto"]    := "Phím Auto:"
     t["vi.autoSep"]      := "Phím ngăn cách:"
     t["vi.history"]      := "📋 Lịch sử"
     t["vi.msgAuto"]      := "Đang tự động dán... (ESC để dừng)"
@@ -113,10 +115,11 @@ BuildTexts() {
     t["en.trayExit"]     := "Exit"
     t["en.warnAdmin"]    := "Hotkey fails? Run as Admin"
     t["en.delay"]        := "Delay:"
-    t["en.ms"]           := "ms"
+    t["en.sec"]           := "sec"
     t["en.skipEmpty"]    := "Skip empty"
     t["en.loadFile"]     := "📂 File"
     t["en.autoMode"]     := "⚡ Auto"
+    t["en.labelAuto"]    := "Auto Key:"
     t["en.autoSep"]      := "Separator:"
     t["en.history"]      := "📋 History"
     t["en.msgAuto"]      := "Auto-pasting... (ESC to stop)"
@@ -151,7 +154,8 @@ LoadConfig() {
             Lang := IniRead(ConfigFile, "Settings", "Language", "vi")
             PasteKey := IniRead(ConfigFile, "Settings", "PasteKey", "F9")
             BackKey := IniRead(ConfigFile, "Settings", "BackKey", "F10")
-            PasteDelay := Integer(IniRead(ConfigFile, "Settings", "PasteDelay", "100"))
+            AutoKey := IniRead(ConfigFile, "Settings", "AutoKey", "F11")
+            PasteDelay := Float(IniRead(ConfigFile, "Settings", "PasteDelay", "0.1"))
             SkipEmpty := Integer(IniRead(ConfigFile, "Settings", "SkipEmpty", "1"))
             AutoSepKey := IniRead(ConfigFile, "Settings", "AutoSepKey", "Tab")
         }
@@ -163,6 +167,7 @@ SaveConfig() {
     IniWrite(Lang, ConfigFile, "Settings", "Language")
     IniWrite(PasteKey, ConfigFile, "Settings", "PasteKey")
     IniWrite(BackKey, ConfigFile, "Settings", "BackKey")
+    IniWrite(AutoKey, ConfigFile, "Settings", "AutoKey")
     IniWrite(PasteDelay, ConfigFile, "Settings", "PasteDelay")
     IniWrite(SkipEmpty, ConfigFile, "Settings", "SkipEmpty")
     IniWrite(AutoSepKey, ConfigFile, "Settings", "AutoSepKey")
@@ -174,7 +179,8 @@ CreateGUI() {
     global MainGui, StatusText, CurrentText, PreviewText, ProgressText, ProgressBar
     global BtnPaste, BtnBack, BtnReset, BtnPasteKey, BtnBackKey
     global ChkLoop, ChkOnTop, ChkStartup, ChkLang, ChkSkipEmpty, EdtInput
-    global EdtDelay, DdlSep, DdlHistory, BtnAuto
+    global EdtDelay, DdlSep, DdlHistory, BtnAuto, BtnAutoKey
+    global AutoSepKey, AutoKey, SkipEmpty, PasteDelay
 
     ; --- Window ---
     MainGui := Gui("+AlwaysOnTop -Resize", GetText("title"))
@@ -227,53 +233,57 @@ CreateGUI() {
     ; ==========================================
     ; GroupBox: Phím tắt  (left side)
     ; ==========================================
-    MainGui.Add("GroupBox", "x10 y200 w230 h105", GetText("grpHotkey"))
+    MainGui.Add("GroupBox", "x10 y200 w230 h130", GetText("grpHotkey"))
 
-    MainGui.Add("Text", "x25 y225 w70 h20", GetText("labelPaste")).SetFont("s9")
-    BtnPasteKey := MainGui.Add("Button", "x100 y222 w55 h24", PasteKey)
+    MainGui.Add("Text", "x25 y222 w70 h20", GetText("labelPaste")).SetFont("s9")
+    BtnPasteKey := MainGui.Add("Button", "x100 y219 w55 h24", PasteKey)
     BtnPasteKey.SetFont("s9 Bold")
     BtnPasteKey.OnEvent("Click", (*) => ChangeHotkey("paste"))
 
-    MainGui.Add("Text", "x165 y225 w30 h20", "...").SetFont("s9 c999999")
+    MainGui.Add("Text", "x165 y222 w30 h20", "...").SetFont("s9 c999999")
 
-    MainGui.Add("Text", "x25 y255 w70 h20", GetText("labelBack")).SetFont("s9")
-    BtnBackKey := MainGui.Add("Button", "x100 y252 w55 h24", BackKey)
+    MainGui.Add("Text", "x25 y250 w70 h20", GetText("labelBack")).SetFont("s9")
+    BtnBackKey := MainGui.Add("Button", "x100 y247 w55 h24", BackKey)
     BtnBackKey.SetFont("s9 Bold")
     BtnBackKey.OnEvent("Click", (*) => ChangeHotkey("back"))
 
-    MainGui.Add("Text", "x25 y282 w200 h16 cB45309", GetText("warnAdmin")).SetFont("s7")
+    MainGui.Add("Text", "x25 y278 w70 h20", GetText("labelAuto")).SetFont("s9")
+    BtnAutoKey := MainGui.Add("Button", "x100 y275 w55 h24", AutoKey)
+    BtnAutoKey.SetFont("s9 Bold")
+    BtnAutoKey.OnEvent("Click", (*) => ChangeHotkey("auto"))
+
+    MainGui.Add("Text", "x25 y305 w200 h16 cB45309", GetText("warnAdmin")).SetFont("s7")
 
     ; ==========================================
     ; GroupBox: Nâng cao (NEW)
     ; ==========================================
-    MainGui.Add("GroupBox", "x10 y310 w420 h100", GetText("grpAdvanced"))
+    MainGui.Add("GroupBox", "x10 y335 w420 h100", GetText("grpAdvanced"))
 
     ; Row 1: Delay + Skip empty + Load file
-    MainGui.Add("Text", "x25 y332 w35 h20", GetText("delay")).SetFont("s8")
-    EdtDelay := MainGui.Add("Edit", "x62 y330 w50 h22 Number", PasteDelay)
+    MainGui.Add("Text", "x25 y357 w35 h20", GetText("delay")).SetFont("s8")
+    EdtDelay := MainGui.Add("Edit", "x62 y355 w45 h22", PasteDelay)
     EdtDelay.SetFont("s8")
-    MainGui.Add("UpDown", "Range0-2000", PasteDelay)
-    MainGui.Add("Text", "x116 y332 w25 h20", GetText("ms")).SetFont("s8 c64748B")
+    MainGui.Add("Text", "x110 y357 w30 h20", GetText("sec")).SetFont("s8 c64748B")
 
-    ChkSkipEmpty := MainGui.Add("Checkbox", "x150 y332 w110", GetText("skipEmpty"))
+    ChkSkipEmpty := MainGui.Add("Checkbox", "x150 y357 w110", GetText("skipEmpty"))
     ChkSkipEmpty.Value := SkipEmpty
     ChkSkipEmpty.SetFont("s8")
     ChkSkipEmpty.OnEvent("Click", (*) => (SkipEmpty := ChkSkipEmpty.Value, SaveConfig()))
 
-    BtnLoadFile := MainGui.Add("Button", "x270 y328 w70 h26", GetText("loadFile"))
+    BtnLoadFile := MainGui.Add("Button", "x270 y353 w70 h26", GetText("loadFile"))
     BtnLoadFile.SetFont("s8")
     BtnLoadFile.OnEvent("Click", LoadFromFile)
 
-    BtnHistory := MainGui.Add("Button", "x345 y328 w75 h26", GetText("history"))
+    BtnHistory := MainGui.Add("Button", "x345 y353 w75 h26", GetText("history"))
     BtnHistory.SetFont("s8")
     BtnHistory.OnEvent("Click", ShowHistory)
 
     ; Row 2: Auto-paste + Separator
-    BtnAuto := MainGui.Add("Button", "x25 y362 w100 h35", GetText("autoMode"))
+    BtnAuto := MainGui.Add("Button", "x25 y387 w100 h35", GetText("autoMode"))
     BtnAuto.SetFont("s10 Bold")
     BtnAuto.OnEvent("Click", DoAutoPaste)
 
-    MainGui.Add("Text", "x140 y370 w85 h20", GetText("autoSep")).SetFont("s8")
+    MainGui.Add("Text", "x140 y395 w85 h20", GetText("autoSep")).SetFont("s8")
     sepList := ["Tab", "Enter", "Space"]
     sepIdx := 1
     for i, v in sepList {
@@ -281,46 +291,46 @@ CreateGUI() {
             sepIdx := i
         }
     }
-    DdlSep := MainGui.Add("DropDownList", "x230 y367 w80 h25 Choose" sepIdx, sepList)
+    DdlSep := MainGui.Add("DropDownList", "x230 y392 w80 Choose" sepIdx, sepList)
     DdlSep.SetFont("s8")
-    DdlSep.OnEvent("Change", (*) => (AutoSepKey := DdlSep.Text, SaveConfig()))
+    DdlSep.OnEvent("Change", OnSepChange)
 
     ; ==========================================
     ; GroupBox: Tùy chọn khác
     ; ==========================================
-    MainGui.Add("GroupBox", "x10 y415 w420 h95", GetText("grpOption"))
+    MainGui.Add("GroupBox", "x10 y440 w420 h95", GetText("grpOption"))
 
-    ChkLoop := MainGui.Add("Checkbox", "x25 y435 w200", GetText("loop"))
+    ChkLoop := MainGui.Add("Checkbox", "x25 y460 w200", GetText("loop"))
     try ChkLoop.Value := IniRead(ConfigFile, "Settings", "Loop", "0")
     ChkLoop.OnEvent("Click", (*) => SaveConfig())
 
-    ChkOnTop := MainGui.Add("Checkbox", "x235 y435 w180 Checked", GetText("ontop"))
+    ChkOnTop := MainGui.Add("Checkbox", "x235 y460 w180 Checked", GetText("ontop"))
     ChkOnTop.OnEvent("Click", ToggleOnTop)
 
-    ChkStartup := MainGui.Add("Checkbox", "x25 y460 w200", GetText("startup"))
+    ChkStartup := MainGui.Add("Checkbox", "x25 y485 w200", GetText("startup"))
     ChkStartup.Value := IsStartupEnabled()
     ChkStartup.OnEvent("Click", ToggleStartup)
 
-    ChkLang := MainGui.Add("Checkbox", "x235 y460 w180", GetText("langBtn"))
+    ChkLang := MainGui.Add("Checkbox", "x235 y485 w180", GetText("langBtn"))
     ChkLang.Value := (Lang = "vi") ? 1 : 0
     ChkLang.OnEvent("Click", ToggleLanguage)
 
     ; ==========================================
     ; Bottom buttons (like Unikey)
     ; ==========================================
-    BtnGuide := MainGui.Add("Button", "x10 y520 w135 h32", GetText("btnGuide"))
+    BtnGuide := MainGui.Add("Button", "x10 y545 w135 h32", GetText("btnGuide"))
     BtnGuide.SetFont("s9")
     BtnGuide.OnEvent("Click", ShowGuide)
 
-    BtnAbout := MainGui.Add("Button", "x155 y520 w135 h32", GetText("btnAbout"))
+    BtnAbout := MainGui.Add("Button", "x155 y545 w135 h32", GetText("btnAbout"))
     BtnAbout.SetFont("s9")
     BtnAbout.OnEvent("Click", ShowAbout)
 
-    BtnClose := MainGui.Add("Button", "x300 y520 w130 h32", GetText("btnClose"))
+    BtnClose := MainGui.Add("Button", "x300 y545 w130 h32", GetText("btnClose"))
     BtnClose.SetFont("s9")
     BtnClose.OnEvent("Click", (*) => MainGui.Hide())
 
-    MainGui.Show("w440 h560")
+    MainGui.Show("w440 h585")
 }
 
 ; ============ GUIDE DIALOG ============
@@ -410,10 +420,17 @@ ShowAbout(*) {
 }
 
 ; ============ HOTKEY FUNCTIONS ============
+OnSepChange(*) {
+    global AutoSepKey, DdlSep
+    AutoSepKey := DdlSep.Text
+    SaveConfig()
+}
+
 SetupHotkeys() {
     global
     try Hotkey("$" PasteKey, DoPaste)
     try Hotkey("$" BackKey, DoBack)
+    try Hotkey("$" AutoKey, DoAutoPaste)
 }
 
 ChangeHotkey(which) {
@@ -467,13 +484,20 @@ ChangeHotkey(which) {
         BtnPasteKey.Text := PasteKey
         SaveConfig()
         ShowToast(GetText("msgPasteKey") PasteKey)
-    } else if (which = "back" && detectedKey != PasteKey) {
+    } else if (which = "back" && detectedKey != PasteKey && detectedKey != AutoKey) {
         try Hotkey("$" BackKey, "Off")
         BackKey := detectedKey
         try Hotkey("$" BackKey, DoBack)
         BtnBackKey.Text := BackKey
         SaveConfig()
         ShowToast(GetText("msgBackKey") BackKey)
+    } else if (which = "auto" && detectedKey != PasteKey && detectedKey != BackKey) {
+        try Hotkey("$" AutoKey, "Off")
+        AutoKey := detectedKey
+        try Hotkey("$" AutoKey, DoAutoPaste)
+        BtnAutoKey.Text := AutoKey
+        SaveConfig()
+        ShowToast("Auto Key: " AutoKey)
     }
 }
 
@@ -554,19 +578,21 @@ DoAutoPaste(*) {
         return
     }
 
-    ; Read delay from edit box
+    ; Read delay from edit box (seconds)
     try {
-        PasteDelay := Integer(EdtDelay.Value)
+        PasteDelay := Float(EdtDelay.Value)
     }
+    delayMs := Round(PasteDelay * 1000)
     SaveConfig()
 
-    ; Determine separator key
+    ; Read separator directly from dropdown
+    selectedSep := DdlSep.Text
     sepKey := ""
-    if (AutoSepKey = "Tab") {
+    if (selectedSep = "Tab") {
         sepKey := "{Tab}"
-    } else if (AutoSepKey = "Enter") {
+    } else if (selectedSep = "Enter") {
         sepKey := "{Enter}"
-    } else if (AutoSepKey = "Space") {
+    } else if (selectedSep = "Space") {
         sepKey := "{Space}"
     }
 
@@ -600,8 +626,8 @@ DoAutoPaste(*) {
         if (CurrentIndex <= Queue.Length) {
             Sleep 50
             Send sepKey
-            if (PasteDelay > 0) {
-                Sleep PasteDelay
+            if (delayMs > 0) {
+                Sleep delayMs
             }
         }
     }
