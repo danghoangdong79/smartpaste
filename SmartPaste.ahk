@@ -565,81 +565,108 @@ DoReset(*) {
 }
 
 ; ============ AUTO-PASTE MODE ============
+global AutoDelayMs := 100
+global AutoSep := "{Tab}"
+
 DoAutoPaste(*) {
     global
+
+    ; Toggle off if already running
+    if (IsAutoPasting) {
+        StopAutoPaste()
+        return
+    }
 
     if (Queue.Length = 0) {
         ShowToast(GetText("msgEmpty"))
         return
     }
 
-    if (IsAutoPasting) {
-        IsAutoPasting := false
+    if (CurrentIndex > Queue.Length) {
+        ShowToast(GetText("msgDone"))
         return
     }
 
-    ; Read delay from edit box (seconds)
+    ; Read delay from edit box (seconds → ms)
     try {
         PasteDelay := Float(EdtDelay.Value)
     }
-    delayMs := Round(PasteDelay * 1000)
+    AutoDelayMs := Round(PasteDelay * 1000)
+    if (AutoDelayMs < 50) {
+        AutoDelayMs := 50
+    }
     SaveConfig()
 
     ; Read separator directly from dropdown
     selectedSep := DdlSep.Text
-    sepKey := ""
-    if (selectedSep = "Tab") {
-        sepKey := "{Tab}"
-    } else if (selectedSep = "Enter") {
-        sepKey := "{Enter}"
+    if (selectedSep = "Enter") {
+        AutoSep := "{Enter}"
     } else if (selectedSep = "Space") {
-        sepKey := "{Space}"
+        AutoSep := "{Space}"
+    } else {
+        AutoSep := "{Tab}"
     }
 
     IsAutoPasting := true
     BtnAuto.Text := "⏹ STOP"
     ShowToast(GetText("msgAuto"))
 
-    while (IsAutoPasting && CurrentIndex <= Queue.Length) {
-        if (GetKeyState("Escape", "P")) {
-            IsAutoPasting := false
-            BtnAuto.Text := GetText("autoMode")
-            ShowToast(GetText("msgAutoStop"))
-            SoundBeep 600, 150
-            RefreshUI()
-            return
+    ; Register ESC as stop key
+    try Hotkey("$Escape", StopAutoPaste, "On")
+
+    ; Start first tick immediately
+    SetTimer(AutoPasteTick, -1)
+}
+
+AutoPasteTick() {
+    global
+
+    if (!IsAutoPasting || CurrentIndex > Queue.Length) {
+        ; Done or stopped
+        if (CurrentIndex > Queue.Length && IsAutoPasting) {
+            ShowToast(GetText("msgAutoDone"))
+            SoundBeep 800, 200
         }
-
-        text := Queue[CurrentIndex]
-        CurrentIndex := CurrentIndex + 1
-
-        IsPasting := true
-        A_Clipboard := text
-        Sleep 30
-        Send "^v"
-        IsPasting := false
-
-        SoundBeep 1500, 20
-        RefreshUI()
-
-        ; Send separator key if not last item
-        if (CurrentIndex <= Queue.Length) {
-            Sleep 50
-            Send sepKey
-            if (delayMs > 0) {
-                Sleep delayMs
-            }
-        }
+        StopAutoPaste()
+        return
     }
 
+    text := Queue[CurrentIndex]
+    CurrentIndex := CurrentIndex + 1
+
+    IsPasting := true
+    A_Clipboard := text
+    Sleep 30
+    Send "^v"
+    IsPasting := false
+
+    SoundBeep 1500, 20
+    RefreshUI()
+
+    ; If more items and still running, send separator and schedule next
+    if (CurrentIndex <= Queue.Length && IsAutoPasting) {
+        Sleep 50
+        Send AutoSep
+        SetTimer(AutoPasteTick, -AutoDelayMs)
+    } else {
+        if (CurrentIndex > Queue.Length) {
+            ShowToast(GetText("msgAutoDone"))
+            SoundBeep 800, 200
+        }
+        StopAutoPaste()
+    }
+}
+
+StopAutoPaste(*) {
+    global
+    if (!IsAutoPasting) {
+        return
+    }
     IsAutoPasting := false
+    SetTimer(AutoPasteTick, 0)  ; cancel pending timer
     BtnAuto.Text := GetText("autoMode")
-
-    if (CurrentIndex > Queue.Length) {
-        ShowToast(GetText("msgAutoDone"))
-        SoundBeep 800, 200
-    }
-
+    try Hotkey("$Escape", "Off")
+    SoundBeep 600, 100
     RefreshUI()
 }
 
