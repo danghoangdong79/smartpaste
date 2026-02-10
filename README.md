@@ -5,6 +5,8 @@
 ![AutoHotkey](https://img.shields.io/badge/AutoHotkey-v2.0-orange)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 
+> **English** | [Tiếng Việt](README.vi.md)
+
 > **Sequential multi-line paster** — A lightweight tool for fast form filling and batch data entry on Windows.
 
 ## ✨ Features
