@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Paste</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">⚡</div>
+      <h1>Smart Paste</h1>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="btnSettings" title="Settings">⚙</button>
+    </div>
+  </header>
+
+  <!-- MAIN VIEW -->
+  <main id="mainView">
+    <!-- Toggle Bar -->
+    <div class="toggle-bar">
+      <div class="toggle-item">
+        <span class="toggle-icon">↻</span>
+        <span>Loop</span>
+        <label class="switch">
+          <input type="checkbox" id="chkLoop">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-item">
+        <span class="toggle-icon">⚡</span>
+        <span>Auto</span>
+        <label class="switch">
+          <input type="checkbox" id="chkAuto">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Queue Status Circle -->
+    <div class="status-ring-container">
+      <div class="status-ring">
+        <svg viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+          <circle class="ring-progress" id="ringProgress" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <div class="ring-content">
+          <div class="ring-label">QUEUE STATUS</div>
+          <div class="ring-number"><span id="currentNum">0</span> <span class="ring-total">/ <span id="totalNum">0</span></span></div>
+          <div class="ring-badge" id="statusBadge">
+            <span class="dot"></span> Waiting
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Up Next Preview -->
+    <div class="card preview-card">
+      <div class="card-header">
+        <span class="card-title">UP NEXT</span>
+        <button class="link-btn" id="btnViewAll">View All</button>
+      </div>
+      <div class="preview-list" id="previewList">
+        <div class="preview-empty">Copy multiple lines to begin</div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-row">
+      <button class="btn btn-secondary" id="btnBack">
+        <span class="btn-icon">‹</span>
+        <div>
+          <div class="btn-label">Previous</div>
+          <div class="btn-hint" id="backKeyLabel">F10</div>
+        </div>
+      </button>
+      <button class="btn btn-primary" id="btnPaste">
+        <span class="btn-icon-lg">📋</span>
+        <div>
+          <div class="btn-label">Paste Next</div>
+          <div class="btn-hint" id="pasteKeyLabel">F9</div>
+        </div>
+      </button>
+      <button class="btn btn-round" id="btnReset" title="Reset">↺</button>
+    </div>
+  </main>
+
+  <!-- SETTINGS VIEW -->
+  <div id="settingsView" class="settings-view hidden">
+    <div class="settings-header">
+      <button class="link-btn" id="btnBack2Main">‹ Back</button>
+      <h2>Settings</h2>
+      <button class="link-btn accent" id="btnDone">Done</button>
+    </div>
+
+    <!-- General -->
+    <div class="settings-section">
+      <div class="section-label">GENERAL</div>
+      <div class="settings-card">
+        <div class="setting-row">
+          <span class="setting-icon">📌</span>
+          <span>Always on Top</span>
+          <label class="switch"><input type="checkbox" id="chkOnTop" checked><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <span class="setting-icon">🔊</span>
+          <span>Sound Feedback</span>
+          <label class="switch"><input type="checkbox" id="chkSound" checked><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <span class="setting-icon">🚀</span>
+          <span>Launch at Startup</span>
+          <label class="switch"><input type="checkbox" id="chkStartup"><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <span class="setting-icon">🇻🇳</span>
+          <span>Vietnamese UI</span>
+          <label class="switch"><input type="checkbox" id="chkLang"><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <span class="setting-icon">🔇</span>
+          <span>Skip Empty Lines</span>
+          <label class="switch"><input type="checkbox" id="chkSkipEmpty" checked><span class="slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paste Delay -->
+    <div class="settings-section">
+      <div class="section-label">
+        PASTE DELAY
+        <span class="label-value" id="delayValue">0.1 sec</span>
+      </div>
+      <div class="settings-card">
+        <div class="slider-container">
+          <input type="range" id="delaySlider" min="0" max="2" step="0.1" value="0.1" class="range-slider">
+          <div class="slider-labels">
+            <span>⚡ Instant</span>
+            <span>Slow 🐌</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auto-paste Separator -->
+    <div class="settings-section">
+      <div class="section-label">AUTO-PASTE SEPARATOR</div>
+      <div class="settings-card">
+        <div class="sep-pills">
+          <button class="pill active" data-sep="Tab">Tab ↹</button>
+          <button class="pill" data-sep="Enter">Enter ↵</button>
+          <button class="pill" data-sep="Space">Space ␣</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hotkeys -->
+    <div class="settings-section">
+      <div class="section-label">HOTKEYS</div>
+      <div class="settings-card">
+        <div class="hotkey-row">
+          <div>
+            <div class="hotkey-name">Paste Next</div>
+          </div>
+          <button class="hotkey-btn" id="btnHkPaste">F9</button>
+        </div>
+        <div class="hotkey-row">
+          <div>
+            <div class="hotkey-name">Go Back</div>
+          </div>
+          <button class="hotkey-btn" id="btnHkBack">F10</button>
+        </div>
+        <div class="hotkey-row">
+          <div>
+            <div class="hotkey-name">Auto Paste</div>
+          </div>
+          <button class="hotkey-btn" id="btnHkAuto">F11</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Actions -->
+    <div class="settings-section">
+      <div class="section-label">DATA</div>
+      <div class="settings-card">
+        <div class="data-actions">
+          <button class="data-btn" id="btnLoadFile">📂 Load File</button>
+          <button class="data-btn" id="btnHistory">📋 History</button>
+          <button class="data-btn" id="btnManual">✏️ Manual</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="settings-footer">
+      SMART PASTE v0.2 • © 2026 DAHODO
+    </div>
+  </div>
+
+  <!-- MANUAL INPUT MODAL -->
+  <div id="manualModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Manual Input</h3>
+        <button class="modal-close" id="closeManual">✕</button>
+      </div>
+      <textarea id="manualText" placeholder="Paste or type data here (one item per line)..." rows="8"></textarea>
+      <button class="btn btn-primary btn-full" id="btnLoadManual">Load Data</button>
+    </div>
+  </div>
+
+  <!-- HISTORY MODAL -->
+  <div id="historyModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Clipboard History</h3>
+        <button class="modal-close" id="closeHistory">✕</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="preview-empty">No history yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW ALL MODAL -->
+  <div id="viewAllModal" class="modal hidden">
+    <div class="modal-content modal-tall">
+      <div class="modal-header">
+        <h3>All Items</h3>
+        <button class="modal-close" id="closeViewAll">✕</button>
+      </div>
+      <div class="all-items-list" id="allItemsList"></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="main.js"></script>
+</body>
+</html>
