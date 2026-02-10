@@ -1,0 +1,7 @@
+# SmartPaste - Ignore files
+*.zip
+*.exe
+release/
+__pycache__/
+*.pyc
+spq_config.json
