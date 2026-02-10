@@ -635,9 +635,13 @@ AutoPasteTick() {
     CurrentIndex := CurrentIndex + 1
 
     IsPasting := true
-    A_Clipboard := text
+    A_Clipboard := ""          ; Clear clipboard first
     Sleep 30
+    A_Clipboard := text        ; Set new content
+    ClipWait 1                 ; Wait for clipboard to have data
+    Sleep 50                   ; Extra settle time for target app
     Send "^v"
+    Sleep 150                  ; Let Excel/app fully process paste
     IsPasting := false
 
     SoundBeep 1500, 20
@@ -645,7 +649,7 @@ AutoPasteTick() {
 
     ; If more items and still running, send separator and schedule next
     if (CurrentIndex <= Queue.Length && IsAutoPasting) {
-        Sleep 50
+        Sleep 100              ; Wait before separator
         Send AutoSep
         SetTimer(AutoPasteTick, -AutoDelayMs)
     } else {
