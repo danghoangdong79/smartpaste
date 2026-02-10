@@ -1,6 +1,6 @@
 # Smart Paste
 
-![Version](https://img.shields.io/badge/version-0.2-blue)
+![Version](https://img.shields.io/badge/version-0.3-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 

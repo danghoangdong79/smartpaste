@@ -1,4 +1,4 @@
-﻿; Smart Paste v0.2 - AutoHotkey Edition
+﻿; Smart Paste v0.3 - AutoHotkey Edition
 ; Sequential Clipboard Paster
 ; https://github.com/danghoangdong79/smartpaste
 ; MIT License - Copyright (c) 2026 Dahodo (DHD)
@@ -30,7 +30,7 @@ global History := []
 BuildTexts() {
     t := Map()
     ; Vietnamese
-    t["vi.title"]        := "Smart Paste v0.2"
+    t["vi.title"]        := "Smart Paste v0.3"
     t["vi.grpData"]      := "Dữ liệu"
     t["vi.grpAction"]    := "Thao tác"
     t["vi.grpHotkey"]    := "Phím tắt"
@@ -79,7 +79,7 @@ BuildTexts() {
     t["vi.noHistory"]    := "Chưa có lịch sử"
     t["vi.preview"]      := "Xem trước:"
     ; English
-    t["en.title"]        := "Smart Paste v0.2"
+    t["en.title"]        := "Smart Paste v0.3"
     t["en.grpData"]      := "Data"
     t["en.grpAction"]    := "Actions"
     t["en.grpHotkey"]    := "Hotkeys"
@@ -356,7 +356,7 @@ ShowGuide(*) {
             . "   • App sẽ tự dán + chuyển ô liên tục`r`n"
             . "   • Nhấn ESC để dừng`r`n`r`n"
             . "━━━━━━━━━━━━━━━━━━━━━━━━━━━━`r`n`r`n"
-            . "TÍNH NĂNG MỚI v0.2:`r`n"
+            . "TÍNH NĂNG MỚI v0.3:`r`n"
             . "   ⚡ Tự động dán + Tab/Enter`r`n"
             . "   📂 Nạp dữ liệu từ file .txt`r`n"
             . "   📋 Lịch sử clipboard (10 bộ)`r`n"
@@ -378,7 +378,7 @@ ShowGuide(*) {
             . "   • App will auto-paste + move to next cell`r`n"
             . "   • Press ESC to stop`r`n`r`n"
             . "━━━━━━━━━━━━━━━━━━━━━━━━━━━━`r`n`r`n"
-            . "NEW IN v0.2:`r`n"
+            . "NEW IN v0.3:`r`n"
             . "   ⚡ Auto-paste with Tab/Enter`r`n"
             . "   📂 Load data from .txt files`r`n"
             . "   📋 Clipboard history (10 sets)`r`n"
@@ -402,7 +402,7 @@ ShowAbout(*) {
     AboutGui := Gui("+AlwaysOnTop +ToolWindow -Resize", (Lang = "vi") ? "Thông tin" : "About")
     AboutGui.SetFont("s9", "Segoe UI")
 
-    AboutGui.Add("Text", "x20 y15 w320 h20 Center", "Smart Paste v0.2").SetFont("s14 Bold c1E3A5F")
+    AboutGui.Add("Text", "x20 y15 w320 h20 Center", "Smart Paste v0.3").SetFont("s14 Bold c1E3A5F")
     AboutGui.Add("Text", "x20 y42 w320 h16 Center c64748B", (Lang = "vi") ? "Công cụ dán nhiều dòng tuần tự" : "Sequential Multi-line Paster")
 
     AboutGui.Add("GroupBox", "x15 y68 w330 h100", "")
@@ -524,9 +524,22 @@ DoPaste(*) {
     Critical "Off"
 
     IsPasting := true
+    ; Clear clipboard and wait for it to be truly empty
+    A_Clipboard := ""
+    Sleep 50
+    ; Set new content
     A_Clipboard := text
-    Sleep 30
+    ; Wait for clipboard to actually contain the new text (up to 2s)
+    if !ClipWait(2) {
+        ; Retry once if failed
+        A_Clipboard := ""
+        Sleep 50
+        A_Clipboard := text
+        ClipWait 2
+    }
+    Sleep 50
     Send "^v"
+    Sleep 100
     IsPasting := false
     SoundBeep 1500, 30
     RefreshUI()
@@ -546,9 +559,21 @@ DoBack(*) {
         Critical "Off"
 
         IsPasting := true
+        ; Clear clipboard and wait for it to be truly empty
+        A_Clipboard := ""
+        Sleep 50
+        ; Set new content
         A_Clipboard := text
-        Sleep 30
+        ; Wait for clipboard to actually contain the new text (up to 2s)
+        if !ClipWait(2) {
+            A_Clipboard := ""
+            Sleep 50
+            A_Clipboard := text
+            ClipWait 2
+        }
+        Sleep 50
         Send "^v"
+        Sleep 100
         IsPasting := false
         SoundBeep 1500, 30
         RefreshUI()
@@ -565,7 +590,7 @@ DoReset(*) {
 }
 
 ; ============ AUTO-PASTE MODE ============
-global AutoDelayMs := 100
+global AutoDelayMs := 200
 global AutoSep := "{Tab}"
 
 DoAutoPaste(*) {
@@ -592,6 +617,7 @@ DoAutoPaste(*) {
         PasteDelay := Float(EdtDelay.Value)
     }
     AutoDelayMs := Round(PasteDelay * 1000)
+    ; Minimum 50ms — SendText is reliable even at high speed
     if (AutoDelayMs < 50) {
         AutoDelayMs := 50
     }
@@ -608,6 +634,7 @@ DoAutoPaste(*) {
     }
 
     IsAutoPasting := true
+    IsPasting := true          ; Block clipboard monitor for ENTIRE auto-paste session
     BtnAuto.Text := "⏹ STOP"
     ShowToast(GetText("msgAuto"))
 
@@ -621,12 +648,15 @@ DoAutoPaste(*) {
 AutoPasteTick() {
     global
 
+    ; Block ALL other timers during this critical operation
+    Critical "On"
+
     if (!IsAutoPasting || CurrentIndex > Queue.Length) {
-        ; Done or stopped
         if (CurrentIndex > Queue.Length && IsAutoPasting) {
             ShowToast(GetText("msgAutoDone"))
             SoundBeep 800, 200
         }
+        Critical "Off"
         StopAutoPaste()
         return
     }
@@ -634,29 +664,32 @@ AutoPasteTick() {
     text := Queue[CurrentIndex]
     CurrentIndex := CurrentIndex + 1
 
-    IsPasting := true
-    A_Clipboard := ""          ; Clear clipboard first
+    ; === SEND TEXT DIRECTLY — NO CLIPBOARD ===
+    ; SendText types each character via SendInput API
+    ; This completely bypasses the clipboard, eliminating all race conditions
+    ; No ClipWait, no clipboard clear/set — just direct character input
+    SendText text
+
+    ; Small wait for target app to process the text
     Sleep 30
-    A_Clipboard := text        ; Set new content
-    ClipWait 1                 ; Wait for clipboard to have data
-    Sleep 50                   ; Extra settle time for target app
-    Send "^v"
-    Sleep 150                  ; Let Excel/app fully process paste
-    IsPasting := false
 
     SoundBeep 1500, 20
     RefreshUI()
 
-    ; If more items and still running, send separator and schedule next
+    ; === Separator + schedule next ===
     if (CurrentIndex <= Queue.Length && IsAutoPasting) {
-        Sleep 100              ; Wait before separator
         Send AutoSep
+        Sleep 30    ; Let separator key register in target app
+        Critical "Off"
+
+        ; AutoDelayMs is the ONLY delay between items
         SetTimer(AutoPasteTick, -AutoDelayMs)
     } else {
         if (CurrentIndex > Queue.Length) {
             ShowToast(GetText("msgAutoDone"))
             SoundBeep 800, 200
         }
+        Critical "Off"
         StopAutoPaste()
     }
 }
@@ -667,7 +700,8 @@ StopAutoPaste(*) {
         return
     }
     IsAutoPasting := false
-    SetTimer(AutoPasteTick, 0)  ; cancel pending timer
+    IsPasting := false             ; Re-enable clipboard monitor
+    SetTimer(AutoPasteTick, 0)     ; Cancel pending timer
     BtnAuto.Text := GetText("autoMode")
     try Hotkey("$Escape", "Off")
     SoundBeep 600, 100

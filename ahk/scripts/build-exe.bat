@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-echo Building Smart Paste v10.0 EXE...
+echo Building Smart Paste v0.3 EXE...
 echo.
 
 REM Check if Ahk2Exe exists
@@ -18,7 +18,7 @@ REM Build EXE
 echo Compiling SmartPaste.ahk to EXE...
 "C:\Program Files\AutoHotkey\v2\Compiler\Ahk2Exe.exe" ^
     /in "..\SmartPaste.ahk" ^
-    /out "..\release\SmartPaste-v0.1.exe" ^
+    /out "..\release\SmartPaste-v0.3.exe" ^
     /compress 1
 
 if %errorlevel% neq 0 (
@@ -29,6 +29,6 @@ if %errorlevel% neq 0 (
 
 echo.
 echo Build completed successfully!
-echo Output: release\SmartPaste-v10.0.exe
+echo Output: release\SmartPaste-v0.3.exe
 echo.
 pause

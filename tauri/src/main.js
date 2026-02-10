@@ -151,7 +151,6 @@ function setupEvents() {
   $('#btnManual').addEventListener('click', () => $('#manualModal').classList.remove('hidden'));
   $('#closeManual').addEventListener('click', () => $('#manualModal').classList.add('hidden'));
   $('#btnLoadManual').addEventListener('click', loadManual);
-  $('#closeHistory').addEventListener('click', () => $('#historyModal').classList.remove('hidden'));
   $('#closeHistory').addEventListener('click', () => $('#historyModal').classList.add('hidden'));
   $('#closeViewAll').addEventListener('click', () => $('#viewAllModal').classList.add('hidden'));
 
@@ -212,9 +211,9 @@ function doBack() {
     return;
   }
 
-  if (state.currentIndex > 1) {
+  if (state.currentIndex > 0) {
     state.currentIndex--;
-    const text = state.queue[state.currentIndex - 1];
+    const text = state.queue[state.currentIndex];
     copyToClipboard(text);
     playSound(1500, 30);
     refreshUI();
