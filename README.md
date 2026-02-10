@@ -1,6 +1,6 @@
-# Smart Paste v0.1
+# Smart Paste v0.2
 
-![Version](https://img.shields.io/badge/version-0.1-blue)
+![Version](https://img.shields.io/badge/version-0.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![AutoHotkey](https://img.shields.io/badge/AutoHotkey-v2.0-orange)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
@@ -18,6 +18,12 @@
 - ✅ **Loop mode**: Cycle back to start when list ends
 - ✅ **Bilingual UI**: Vietnamese / English
 - ✅ **No virus risk**: Run the script directly, no compilation needed
+- ✅ **Auto-paste mode**: Auto-fill forms with Tab/Enter/Space separator
+- ✅ **Load from file**: Import data from .txt or .csv files
+- ✅ **Clipboard history**: Recall last 10 data sets
+- ✅ **Adjustable delay**: 0-2000ms delay between pastes
+- ✅ **Sound feedback**: Subtle audio cues on paste actions
+- ✅ **3-line preview**: See upcoming items at a glance
 
 ## 📥 Installation
 

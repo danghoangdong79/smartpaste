@@ -1,6 +1,6 @@
-# Smart Paste v0.1
+# Smart Paste v0.2
 
-![Version](https://img.shields.io/badge/version-0.1-blue)
+![Version](https://img.shields.io/badge/version-0.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![AutoHotkey](https://img.shields.io/badge/AutoHotkey-v2.0-orange)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
@@ -18,6 +18,12 @@
 - ✅ **Chế độ lặp**: Quay vòng khi hết danh sách
 - ✅ **Song ngữ**: Tiếng Việt / English
 - ✅ **An toàn**: Chạy trực tiếp script, không lo virus
+- ✅ **Tự động dán**: Tự điền form với Tab/Enter/Space
+- ✅ **Nạp từ file**: Import dữ liệu từ file .txt, .csv
+- ✅ **Lịch sử clipboard**: Nhớ 10 bộ dữ liệu gần nhất
+- ✅ **Tùy chỉnh tốc độ**: Delay 0-2000ms giữa các lần dán
+- ✅ **Âm thanh phản hồi**: Tiếng "tíc" khi dán
+- ✅ **Xem trước 3 dòng**: Thấy dòng sắp dán tiếp theo
 
 ## 📥 Cài đặt
 
