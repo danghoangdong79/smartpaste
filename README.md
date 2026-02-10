@@ -3,6 +3,11 @@
 ![Version](https://img.shields.io/badge/version-0.3-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
+![AutoHotkey](https://img.shields.io/badge/AutoHotkey-v2-334455?logo=autohotkey&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)
+![Tauri](https://img.shields.io/badge/Tauri-2.0-FFC131?logo=tauri&logoColor=white)
+![Rust](https://img.shields.io/badge/Rust-backend-DEA584?logo=rust&logoColor=white)
+![HTML/CSS/JS](https://img.shields.io/badge/HTML%2FCSS%2FJS-frontend-E34F26?logo=html5&logoColor=white)
 
 > **English** | [Tiếng Việt](README.vi.md)
 
