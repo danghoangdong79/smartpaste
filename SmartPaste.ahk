@@ -1,6 +1,6 @@
 ﻿; Smart Paste v0.1 - AutoHotkey Edition
 ; Sequential Clipboard Paster
-; https://github.com/dahodo/smartpaste
+; https://github.com/danghoangdong79/smartpaste
 ; MIT License - Copyright (c) 2026 Dahodo (DHD)
 
 #Requires AutoHotkey v2.0
@@ -315,7 +315,7 @@ ShowAbout(*) {
     aboutDesc := (Lang = "vi") ? "Smart Paste giúp bạn dán nhiều dòng dữ liệu`ntuần tự vào form, Excel, hoặc bất kỳ ứng dụng`nnào trên Windows." : "Smart Paste helps you paste multiple lines`nsequentially into forms, Excel, or any`nWindows application."
     AboutGui.Add("Text", "x30 y88 w300 h60", aboutDesc)
 
-    AboutGui.Add("Text", "x20 y180 w320 h16 Center", "Web: github.com/dahodo/smartpaste").SetFont("s8 c0369A1")
+    AboutGui.Add("Text", "x20 y180 w320 h16 Center", "Web: github.com/danghoangdong79/smartpaste").SetFont("s8 c0369A1")
     AboutGui.Add("Text", "x20 y200 w320 h16 Center c64748B", "© 2026 Dahodo (DHD) | MIT License").SetFont("s8")
 
     BtnOK := AboutGui.Add("Button", "x130 y228 w100 h28", "OK")

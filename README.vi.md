@@ -30,7 +30,7 @@
 1. Cài [AutoHotkey v2.0](https://www.autohotkey.com/)
 2. Tải repo:
    ```bash
-   git clone https://github.com/dahodo/smartpaste.git
+   git clone https://github.com/danghoangdong79/smartpaste.git
    ```
    Hoặc [tải ZIP](https://github.com/danghoangdong79/smartpaste/archive/refs/heads/master.zip)
 3. Double-click `SmartPaste.ahk` để chạy

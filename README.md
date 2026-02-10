@@ -30,7 +30,7 @@
 1. Install [AutoHotkey v2.0](https://www.autohotkey.com/)
 2. Clone or download this repo:
    ```bash
-   git clone https://github.com/dahodo/smartpaste.git
+   git clone https://github.com/danghoangdong79/smartpaste.git
    ```
 3. Double-click `SmartPaste.ahk` to run
 
@@ -131,5 +131,5 @@ MIT License - Copyright (c) 2026 [Dahodo (DHD)](https://dahodo.com)
 <p align="center">
   <a href="https://dahodo.com">Website</a> •
   <a href="mailto:danghoangdong79@gmail.com">Email</a> •
-  <a href="https://github.com/dahodo/smartpaste">GitHub</a>
+  <a href="https://github.com/danghoangdong79/smartpaste">GitHub</a>
 </p>
