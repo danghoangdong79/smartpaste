@@ -76,10 +76,10 @@ $script:AutoSepKey = "Tab"
 
 # Hotkey IDs
 $HOTKEY_PASTE = 1
-$HOTKEY_BACK  = 2
-$HOTKEY_AUTO  = 3
+$HOTKEY_BACK = 2
+$HOTKEY_AUTO = 3
 # VK codes
-$VK_F9  = 0x78
+$VK_F9 = 0x78
 $VK_F10 = 0x79
 $VK_F11 = 0x7A
 
@@ -128,13 +128,14 @@ function Refresh-UI {
     }
 
     # Update listbox
+    $ellipsis = '...'
     $script:ListBox.Items.Clear()
     for ($i = 0; $i -lt $total; $i++) {
-        $prefix = "  "
-        if ($i -eq $script:CurrentIndex) { $prefix = "▶ " }
-        elseif ($i -lt $script:CurrentIndex) { $prefix = "✓ " }
+        $prefix = '  '
+        if ($i -eq $script:CurrentIndex) { $prefix = ([char]0x25B6) + ' ' }
+        elseif ($i -lt $script:CurrentIndex) { $prefix = ([char]0x2713) + ' ' }
         $display = $script:Queue[$i]
-        if ($display.Length -gt 35) { $display = $display.Substring(0, 35) + "..." }
+        if ($display.Length -gt 35) { $display = $display.Substring(0, 35) + $ellipsis }
         $script:ListBox.Items.Add("$prefix$($i+1). $display") | Out-Null
     }
     if ($script:CurrentIndex -lt $script:ListBox.Items.Count) {
@@ -143,29 +144,31 @@ function Refresh-UI {
 
     if ($script:CurrentIndex -lt $total) {
         $item = $script:Queue[$script:CurrentIndex]
-        if ($item.Length -gt 40) { $item = $item.Substring(0, 40) + "..." }
+        if ($item.Length -gt 40) { $item = $item.Substring(0, 40) + $ellipsis }
         $script:CurrentLabel.Text = $item
-        $script:CurrentLabel.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#1E293B")
+        $script:CurrentLabel.ForeColor = [System.Drawing.ColorTranslator]::FromHtml('#1E293B')
 
         # Preview
-        $preview = ""
+        $preview = ''
         if ($script:CurrentIndex + 1 -lt $total) {
             $p1 = $script:Queue[$script:CurrentIndex + 1]
-            if ($p1.Length -gt 30) { $p1 = $p1.Substring(0, 30) + "..." }
-            $preview = [char]0x2192 + " " + $p1
+            if ($p1.Length -gt 30) { $p1 = $p1.Substring(0, 30) + $ellipsis }
+            $preview = ([char]0x2192) + ' ' + $p1
         }
         $script:PreviewLabel.Text = $preview
-    } else {
-        $script:CurrentLabel.Text = "Da hoan thanh!"
+    }
+    else {
+        $script:CurrentLabel.Text = 'Da hoan thanh!'
         $script:CurrentLabel.ForeColor = [System.Drawing.Color]::Green
-        $script:PreviewLabel.Text = ""
+        $script:PreviewLabel.Text = ''
     }
 
     $done = $script:CurrentIndex
     $pct = if ($total -gt 0) { [math]::Round($done / $total * 100) } else { 0 }
     $script:ProgressBar.Maximum = 100
     $script:ProgressBar.Value = $pct
-    $script:ProgressLabel.Text = "$done / $total  ($pct%)"
+    $pctSign = '%'
+    $script:ProgressLabel.Text = "$done / $total  ($pct$pctSign)"
     $remain = $total - $done
     $script:StatusLabel.Text = "Da dan $done/$total - Con $remain muc"
 }
@@ -175,7 +178,8 @@ function Do-Paste {
     if ($script:CurrentIndex -ge $script:Queue.Count) {
         if ($script:ChkLoop.Checked) {
             $script:CurrentIndex = 0
-        } else {
+        }
+        else {
             Show-Toast "Da hoan thanh!"
             [System.Media.SystemSounds]::Exclamation.Play()
             return
@@ -206,7 +210,8 @@ function Do-Back {
         $script:IsPasting = $false
         [System.Media.SystemSounds]::Asterisk.Play()
         Refresh-UI
-    } else {
+    }
+    else {
         Show-Toast "Da o muc dau tien"
     }
 }
@@ -279,7 +284,8 @@ function AutoPaste-Tick {
         Start-Sleep -Milliseconds 30
         $script:AutoTimer.Interval = $delayMs
         $script:AutoTimer.Start()
-    } else {
+    }
+    else {
         if ($script:CurrentIndex -ge $script:Queue.Count) {
             Show-Toast "Tu dong dan xong!"
             [System.Media.SystemSounds]::Exclamation.Play()
@@ -313,7 +319,8 @@ function Load-FromFile {
         try {
             $content = [System.IO.File]::ReadAllText($ofd.FileName, [System.Text.Encoding]::UTF8)
             Load-Queue $content
-        } catch {
+        }
+        catch {
             [System.Windows.Forms.MessageBox]::Show("Khong doc duoc file: $_", "Loi", "OK", "Error")
         }
     }
@@ -331,7 +338,8 @@ function Check-Clipboard {
                 }
             }
         }
-    } catch { }
+    }
+    catch { }
 }
 
 # ============ BUILD GUI ============
@@ -436,7 +444,7 @@ $form.Controls.Add($btnReset)
 $btnFile = New-Object System.Windows.Forms.Button
 $btnFile.Location = New-Object System.Drawing.Point(361, 268)
 $btnFile.Size = New-Object System.Drawing.Size(75, 40)
-$btnFile.Text = [char]0x1F4C2 + " File"
+$btnFile.Text = ">> File"
 $btnFile.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#64748B")
 $btnFile.ForeColor = [System.Drawing.Color]::White
 $btnFile.FlatStyle = "Flat"
@@ -580,27 +588,24 @@ $script:AutoTimer.Add_Tick({ AutoPaste-Tick })
 # ============ GLOBAL HOTKEYS ============
 # Register on form load
 $form.Add_Load({
-    [HotKeyHelper]::RegisterHotKey($form.Handle, $HOTKEY_PASTE, 0, $VK_F9) | Out-Null
-    [HotKeyHelper]::RegisterHotKey($form.Handle, $HOTKEY_BACK, 0, $VK_F10) | Out-Null
-    [HotKeyHelper]::RegisterHotKey($form.Handle, $HOTKEY_AUTO, 0, $VK_F11) | Out-Null
-})
+        [HotKeyHelper]::RegisterHotKey($form.Handle, $HOTKEY_PASTE, 0, $VK_F9) | Out-Null
+        [HotKeyHelper]::RegisterHotKey($form.Handle, $HOTKEY_BACK, 0, $VK_F10) | Out-Null
+        [HotKeyHelper]::RegisterHotKey($form.Handle, $HOTKEY_AUTO, 0, $VK_F11) | Out-Null
+    })
 
 # Cleanup on close
 $form.Add_FormClosing({
-    [HotKeyHelper]::UnregisterHotKey($form.Handle, $HOTKEY_PASTE) | Out-Null
-    [HotKeyHelper]::UnregisterHotKey($form.Handle, $HOTKEY_BACK) | Out-Null
-    [HotKeyHelper]::UnregisterHotKey($form.Handle, $HOTKEY_AUTO) | Out-Null
-    $clipTimer.Stop()
-    $script:AutoTimer.Stop()
-})
+        [HotKeyHelper]::UnregisterHotKey($form.Handle, $HOTKEY_PASTE) | Out-Null
+        [HotKeyHelper]::UnregisterHotKey($form.Handle, $HOTKEY_BACK) | Out-Null
+        [HotKeyHelper]::UnregisterHotKey($form.Handle, $HOTKEY_AUTO) | Out-Null
+        $clipTimer.Stop()
+        $script:AutoTimer.Stop()
+    })
 
-# Override WndProc to catch hotkey messages
-# We use a message filter instead
-$messageFilter = New-Object System.Windows.Forms.Timer
-$messageFilter.Interval = 50
+# Override WndProc to catch hotkey messages via NativeWindow subclass
 
 # Alternative: Use a NativeWindow subclass for WM_HOTKEY
-Add-Type @"
+Add-Type -ReferencedAssemblies System.Windows.Forms @"
 using System;
 using System.Windows.Forms;
 public class HotKeyWindow : NativeWindow {
@@ -623,16 +628,16 @@ public class HotKeyWindow : NativeWindow {
 "@
 
 $form.Add_Shown({
-    $hkWin = New-Object HotKeyWindow($form.Handle)
-    $hkWin.add_HotKeyPressed({
-        param($sender, $id)
-        switch ($id) {
-            1 { Do-Paste }
-            2 { Do-Back }
-            3 { Do-AutoPaste }
-        }
+        $hkWin = New-Object HotKeyWindow($form.Handle)
+        $hkWin.add_HotKeyPressed({
+                param($sender, $id)
+                switch ($id) {
+                    1 { Do-Paste }
+                    2 { Do-Back }
+                    3 { Do-AutoPaste }
+                }
+            })
     })
-})
 
 # ============ RUN ============
 [System.Windows.Forms.Application]::EnableVisualStyles()
