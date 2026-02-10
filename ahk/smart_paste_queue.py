@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Smart Paste v0.1 - Python + PyQt5 Edition
+Smart Paste v0.3 - Python + PyQt5 Edition
 Paste nhiều dòng tuần tự
 
 Copyright (c) 2026 Dahodo (DHD)
@@ -394,7 +394,7 @@ class MainWindow(QMainWindow):
 
 <hr style="margin-top: 20px;">
 <p style="text-align: center; color: #64748b; font-size: 11px;">
-<b>Smart Paste v0.1</b><br>
+<b>Smart Paste v0.3</b><br>
 © 2026 Dahodo (DHD)<br>
 MIT License | dahodo.com
 </p>
