@@ -4,6 +4,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![AutoHotkey](https://img.shields.io/badge/AutoHotkey-v2-334455?logo=autohotkey&logoColor=white)
+![PowerShell](https://img.shields.io/badge/PowerShell-5.1+-012456?logo=powershell&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)
 ![Tauri](https://img.shields.io/badge/Tauri-2.0-FFC131?logo=tauri&logoColor=white)
 ![Rust](https://img.shields.io/badge/Rust-backend-DEA584?logo=rust&logoColor=white)
@@ -13,15 +14,15 @@
 
 > **Dán nhiều dòng tuần tự** — Công cụ điền form nhanh và nhập liệu hàng loạt trên Windows.
 
-## 📦 Hai phiên bản
+## 📦 Các phiên bản
 
-| | AHK Edition | Tauri Edition |
-|--|-------------|---------------|
-| **Phù hợp** | Tối giản, nhanh, nhẹ | Giao diện hiện đại, chuyên nghiệp |
-| **Kích thước** | ~1.3 MB | ~5 MB |
-| **Giao diện** | Windows chuẩn | Dark mode, animation |
-| **Yêu cầu** | [AutoHotkey v2](https://autohotkey.com) hoặc .exe | Chỉ chạy .exe |
-| **Thư mục** | [`ahk/`](ahk/) | [`tauri/`](tauri/) |
+| | AHK Edition | PowerShell Edition | Python Edition | Tauri Edition |
+|--|-------------|-------------------|----------------|---------------|
+| **Phù hợp** | Đầy đủ tính năng, nhẹ | 🏢 Máy công ty / hạn chế | Có sẵn Python | Giao diện hiện đại |
+| **Kích thước** | ~1.3 MB | ~15 KB (1 file) | ~22 KB (1 file) | ~5 MB |
+| **Giao diện** | Windows chuẩn | WinForms (.NET) | PyQt5 | Dark mode, animation |
+| **Cài đặt?** | [AutoHotkey v2](https://autohotkey.com) hoặc .exe | ⚡ **Không cần cài** | Python + pip packages | Chỉ chạy .exe |
+| **Thư mục** | [`ahk/`](ahk/) | [`powershell/`](powershell/) | [`ahk/`](ahk/) | [`tauri/`](tauri/) |
 
 ## ✨ Tính năng
 
@@ -37,7 +38,7 @@
 
 ## 📥 Bắt đầu nhanh
 
-### AHK Edition (Nhẹ)
+### AHK Edition (Đầy đủ tính năng)
 ```bash
 # Cách 1: Chạy script (cần AutoHotkey v2)
 cd ahk
@@ -46,26 +47,72 @@ cd ahk
 # Cách 2: Tải .exe từ Releases
 ```
 
+### PowerShell Edition (Không cần cài — cho máy công ty) ⭐
+```powershell
+# Chuột phải SmartPaste.ps1 → "Run with PowerShell"
+# HOẶC chạy từ cmd:
+powershell -ExecutionPolicy Bypass -File powershell\SmartPaste.ps1
+```
+> 💡 **Không cần quyền admin.** Chạy trên mọi máy Windows 7+. Không cài đặt, không bị antivirus chặn.
+
 ### Tauri Edition (UI hiện đại)
 ```bash
 # Tải từ Releases — chỉ cần chạy .exe
 ```
+
+### Python Edition (với Python Portable — Không cần cài)
+
+<details>
+<summary>📦 Bấm để xem hướng dẫn Python Portable</summary>
+
+Nếu máy công ty không cho cài Python, dùng **Python Embeddable** (portable, không cần admin):
+
+**Bước 1:** Tải [Python Embeddable](https://www.python.org/downloads/) (chọn "Windows embeddable package (64-bit)")
+
+**Bước 2:** Giải nén vào thư mục, vd: `C:\Tools\python\`
+
+**Bước 3:** Cài pip (thư mục đã có `python.exe`):
+```cmd
+C:\Tools\python\python.exe -c "import ensurepip; ensurepip.default_pip()"
+```
+
+**Bước 4:** Sửa file `python312._pth` (hoặc tương tự) — **bỏ comment** dòng `import site`:
+```
+# Uncomment to run site.main() automatically
+import site
+```
+
+**Bước 5:** Cài thư viện:
+```cmd
+C:\Tools\python\python.exe -m pip install PyQt5 pywin32 keyboard
+```
+
+**Bước 6:** Chạy SmartPaste:
+```cmd
+C:\Tools\python\python.exe ahk\smart_paste_queue.py
+```
+
+> 💡 **Cách khác:** Dùng [WinPython](https://winpython.github.io/) — bản Python portable đầy đủ, không cần cấu hình.
+
+</details>
 
 ## 📂 Cấu trúc
 
 ```
 smartpaste/
 ├── ahk/                        ← AHK Edition
-│   ├── SmartPaste.ahk
-│   ├── smart_paste_queue.py
-│   ├── config.ini
-│   └── scripts/build-exe.bat
+│   ├── SmartPaste.ahk          # Script chính (AutoHotkey v2)
+│   ├── smart_paste_queue.py    # Python Edition
+│   ├── config.ini              # Cấu hình
+│   └── scripts/build-exe.bat   # Build thành .exe
+├── powershell/                 ← PowerShell Edition ⭐
+│   └── SmartPaste.ps1          # 1 file duy nhất, không cần cài
 ├── tauri/                      ← Tauri Edition
-│   ├── src-tauri/
-│   └── src/
+│   ├── src-tauri/              # Rust backend
+│   └── src/                    # Web frontend (HTML/CSS/JS)
 ├── LICENSE
-├── README.md
-└── README.vi.md
+├── README.md                   # English
+└── README.vi.md                # Tiếng Việt
 ```
 
 ## 🤝 Đóng góp
