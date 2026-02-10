@@ -1,6 +1,6 @@
 # Smart Paste
 
-![Version](https://img.shields.io/badge/version-0.3-blue)
+![Version](https://img.shields.io/badge/version-0.4-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![AutoHotkey](https://img.shields.io/badge/AutoHotkey-v2-334455?logo=autohotkey&logoColor=white)
@@ -29,12 +29,49 @@
 - ✅ **Auto-detect clipboard** — Copy multiple lines, app loads automatically
 - ✅ **F9 paste forward** — Paste lines sequentially
 - ✅ **F10 paste backward** — Go back and re-paste
-- ✅ **⚡ Auto-paste mode** — Auto-fill forms with Tab/Enter/Space
-- ✅ **Custom hotkeys** — Assign any key or combo
+- ✅ **⚡ Auto-paste mode** — Auto-fill forms with configurable separator
+- ✅ **Custom hotkeys** — Assign any key or combo for all functions
 - ✅ **Load from file** — Import .txt / .csv data
 - ✅ **Clipboard history** — Recall last 10 data sets
 - ✅ **Adjustable delay** — Fine-tune paste speed
 - ✅ **Bilingual UI** — Vietnamese / English
+
+### 🆕 What's New in v0.4
+
+- 🔥 **Master ON/OFF toggle** — F12 (configurable) to enable/disable all hotkeys instantly
+- 🔥 **Custom separator combos** — Use Ctrl+N, Ctrl+Enter, Ctrl+Tab, or any key combo as separator
+- 🔥 **🔧 Custom capture** — Press any key/combo to use as separator (click 🔧 button)
+- 🔥 **F9 + separator mode** — Each F9 press pastes a line AND sends the separator automatically
+- 🔥 **Tray icon state** — Icon changes (bright/muted) when toggled ON/OFF
+- 🔥 **Tauri integration** — AHK engine toggle from the Tauri app interface
+
+### ⌨️ Default Hotkeys
+
+| Key | Action |
+|-----|--------|
+| **F9** | Paste next line |
+| **F10** | Go back & paste previous line |
+| **F11** | Start/Stop auto-paste |
+| **F12** | Toggle ON/OFF (all hotkeys) |
+| **ESC** | Stop auto-paste (during auto mode) |
+
+> All hotkeys are fully remappable from the GUI.
+
+### 🔧 Separator Options
+
+After each paste (auto-mode or F9+separator), Smart Paste can send:
+
+| Preset | Use Case |
+|--------|----------|
+| Tab | Move to next field (forms) |
+| Enter | New row (spreadsheets) |
+| Space | Inline separation |
+| **Ctrl+N** | New record (CRM, ERP) |
+| **Ctrl+Enter** | New line (chat, editors) |
+| **Ctrl+Tab** | Next tab |
+| **Down** | Next cell down (Excel) |
+| **Ctrl+Down** | Jump down (Excel) |
+| **🔧 Custom** | Any key combo you define |
 
 ## 📥 Quick Start
 
@@ -109,7 +146,7 @@ smartpaste/
 ├── powershell/                 ← PowerShell Edition ⭐
 │   └── SmartPaste.ps1          # Single file, zero install
 ├── tauri/                      ← Tauri Edition
-│   ├── src-tauri/              # Rust backend
+│   ├── src-tauri/              # Rust backend (AHK engine control)
 │   └── src/                    # Web frontend (HTML/CSS/JS)
 ├── LICENSE
 ├── README.md                   # English

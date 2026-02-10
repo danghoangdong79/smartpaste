@@ -14,7 +14,7 @@
   <!-- HEADER -->
   <header class="header">
     <div class="header-left">
-      <div class="logo">⚡</div>
+      <div class="logo">📋</div>
       <h1>Smart Paste</h1>
     </div>
     <div class="header-right">
@@ -24,11 +24,28 @@
 
   <!-- MAIN VIEW -->
   <main id="mainView">
+    <!-- AHK Engine Toggle -->
+    <div class="engine-toggle">
+      <div class="engine-info">
+        <div class="engine-icon" id="engineIcon">⚡</div>
+        <div class="engine-text">
+          <div class="engine-title">Smart Paste Engine</div>
+          <div class="engine-status" id="engineStatus">
+            <span class="engine-dot" id="engineDot"></span>
+            <span id="engineStatusText">Stopped</span>
+          </div>
+        </div>
+      </div>
+      <button class="engine-btn" id="btnEngine" title="Toggle Engine">
+        <span class="engine-btn-icon" id="engineBtnIcon">▶</span>
+      </button>
+    </div>
+
     <!-- Toggle Bar -->
     <div class="toggle-bar">
       <div class="toggle-item">
         <span class="toggle-icon">↻</span>
-        <span>Loop</span>
+        <span>Loop<br>Mode</span>
         <label class="switch">
           <input type="checkbox" id="chkLoop">
           <span class="slider"></span>
@@ -36,7 +53,7 @@
       </div>
       <div class="toggle-item">
         <span class="toggle-icon">⚡</span>
-        <span>Auto</span>
+        <span>Auto-<br>Paste</span>
         <label class="switch">
           <input type="checkbox" id="chkAuto">
           <span class="slider"></span>
@@ -97,13 +114,13 @@
   <div id="settingsView" class="settings-view hidden">
     <div class="settings-header">
       <button class="link-btn" id="btnBack2Main">‹ Back</button>
-      <h2>Settings</h2>
+      <h2>Settings & Hotkeys</h2>
       <button class="link-btn accent" id="btnDone">Done</button>
     </div>
 
-    <!-- General -->
+    <!-- General Preferences -->
     <div class="settings-section">
-      <div class="section-label">GENERAL</div>
+      <div class="section-label">GENERAL PREFERENCES</div>
       <div class="settings-card">
         <div class="setting-row">
           <span class="setting-icon">📌</span>
@@ -137,15 +154,18 @@
     <div class="settings-section">
       <div class="section-label">
         PASTE DELAY
-        <span class="label-value" id="delayValue">0.1 sec</span>
+        <span class="label-value" id="delayValue">100 ms</span>
       </div>
       <div class="settings-card">
         <div class="slider-container">
           <input type="range" id="delaySlider" min="0" max="2" step="0.1" value="0.1" class="range-slider">
           <div class="slider-labels">
-            <span>⚡ Instant</span>
-            <span>Slow 🐌</span>
+            <span>⚡ Instant (0ms)</span>
+            <span>Slow (2000ms) 🐌</span>
           </div>
+        </div>
+        <div class="slider-description">
+          Adjust the delay between pasting items to match the target app's responsiveness.
         </div>
       </div>
     </div>
@@ -162,27 +182,30 @@
       </div>
     </div>
 
-    <!-- Hotkeys -->
+    <!-- Hotkey Management -->
     <div class="settings-section">
-      <div class="section-label">HOTKEYS</div>
+      <div class="section-label">HOTKEY MANAGEMENT</div>
       <div class="settings-card">
         <div class="hotkey-row">
           <div>
-            <div class="hotkey-name">Paste Next</div>
+            <div class="hotkey-name">Paste Next <span class="hotkey-status active">ACTIVE</span></div>
+            <div class="hotkey-binding">Current Binding: <kbd id="btnHkPaste">F9</kbd></div>
           </div>
-          <button class="hotkey-btn" id="btnHkPaste">F9</button>
+          <button class="hotkey-btn" id="btnRemapPaste">Remap</button>
         </div>
         <div class="hotkey-row">
           <div>
-            <div class="hotkey-name">Go Back</div>
+            <div class="hotkey-name">Paste Previous</div>
+            <div class="hotkey-binding">Current Binding: <kbd id="btnHkBack">F10</kbd></div>
           </div>
-          <button class="hotkey-btn" id="btnHkBack">F10</button>
+          <button class="hotkey-btn" id="btnRemapBack">Remap</button>
         </div>
         <div class="hotkey-row">
           <div>
             <div class="hotkey-name">Auto Paste</div>
+            <div class="hotkey-binding">Current Binding: <kbd id="btnHkAuto">F11</kbd></div>
           </div>
-          <button class="hotkey-btn" id="btnHkAuto">F11</button>
+          <button class="hotkey-btn" id="btnRemapAuto">Remap</button>
         </div>
       </div>
     </div>
@@ -201,7 +224,7 @@
 
     <!-- Footer -->
     <div class="settings-footer">
-      SMART PASTE v0.3 • © 2026 DAHODO
+      SMART PASTE V0.3.0 (BUILD 52) • © 2026 DAHODO
     </div>
   </div>
 

@@ -1,6 +1,6 @@
 # Smart Paste
 
-![Version](https://img.shields.io/badge/version-0.3-blue)
+![Version](https://img.shields.io/badge/version-0.4-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![AutoHotkey](https://img.shields.io/badge/AutoHotkey-v2-334455?logo=autohotkey&logoColor=white)
@@ -29,12 +29,49 @@
 - ✅ **Tự nhận clipboard** — Copy nhiều dòng, app tự nạp
 - ✅ **F9 dán tiến** — Dán từng dòng tuần tự
 - ✅ **F10 dán lùi** — Quay lại dán dòng trước
-- ✅ **⚡ Tự động dán** — Tự điền form với Tab/Enter/Space
+- ✅ **⚡ Tự động dán** — Tự điền form với phím ngăn cách tùy chọn
 - ✅ **Đổi phím tự do** — Gán bất kỳ phím hoặc tổ hợp
 - ✅ **Nạp từ file** — Import .txt / .csv
 - ✅ **Lịch sử clipboard** — Nhớ 10 bộ dữ liệu gần nhất
 - ✅ **Tùy chỉnh delay** — Điều chỉnh tốc độ dán
 - ✅ **Song ngữ** — Tiếng Việt / English
+
+### 🆕 Mới trong v0.4
+
+- 🔥 **Nút BẬT/TẮT tổng** — F12 (có thể đổi) để bật/tắt mọi hotkey ngay lập tức
+- 🔥 **Tổ hợp phím ngăn cách** — Dùng Ctrl+N, Ctrl+Enter, Ctrl+Tab, hoặc bất kỳ combo
+- 🔥 **🔧 Tự chọn phím** — Nhấn bất kỳ phím/combo để dùng làm ngăn cách
+- 🔥 **F9 + ngăn cách** — Mỗi lần F9: dán 1 dòng + tự gửi phím ngăn cách
+- 🔥 **Icon tray đổi màu** — Sáng khi BẬT, mờ khi TẮT
+- 🔥 **Tích hợp Tauri** — Bật/tắt AHK engine từ giao diện Tauri
+
+### ⌨️ Phím tắt mặc định
+
+| Phím | Chức năng |
+|------|-----------|
+| **F9** | Dán dòng tiếp theo |
+| **F10** | Lùi lại + dán dòng trước |
+| **F11** | Bắt đầu/Dừng tự động dán |
+| **F12** | Bật/Tắt app (mọi hotkey) |
+| **ESC** | Dừng tự động dán |
+
+> Tất cả phím tắt đều có thể đổi lại từ giao diện.
+
+### 🔧 Phím ngăn cách
+
+Sau mỗi lần dán (auto hoặc F9+ngăn cách), Smart Paste gửi:
+
+| Preset | Dùng cho |
+|--------|----------|
+| Tab | Chuyển ô tiếp theo (form) |
+| Enter | Xuống dòng (bảng tính) |
+| Space | Ngăn cách inline |
+| **Ctrl+N** | Tạo record mới (CRM, ERP) |
+| **Ctrl+Enter** | Xuống dòng mới (chat, editor) |
+| **Ctrl+Tab** | Chuyển tab |
+| **Down** | Xuống 1 ô (Excel) |
+| **Ctrl+Down** | Nhảy xuống (Excel) |
+| **🔧 Tùy chọn** | Bất kỳ combo bạn định nghĩa |
 
 ## 📥 Bắt đầu nhanh
 
@@ -108,7 +145,7 @@ smartpaste/
 ├── powershell/                 ← PowerShell Edition ⭐
 │   └── SmartPaste.ps1          # 1 file duy nhất, không cần cài
 ├── tauri/                      ← Tauri Edition
-│   ├── src-tauri/              # Rust backend
+│   ├── src-tauri/              # Rust backend (điều khiển AHK engine)
 │   └── src/                    # Web frontend (HTML/CSS/JS)
 ├── LICENSE
 ├── README.md                   # English

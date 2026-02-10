@@ -5,6 +5,7 @@ const state = {
   history: [],
   isAutoPasting: false,
   autoTimer: null,
+  engineRunning: false,
   settings: {
     loop: false,
     auto: false,
@@ -24,6 +25,19 @@ const state = {
 
 const CIRCUMFERENCE = 2 * Math.PI * 52; // ~326.7
 
+// ============ TAURI BRIDGE ============
+const isTauri = window.__TAURI__ !== undefined;
+
+async function tauriInvoke(cmd, args) {
+  if (!isTauri) return null;
+  try {
+    return await window.__TAURI__.core.invoke(cmd, args || {});
+  } catch (e) {
+    console.error(`Tauri invoke ${cmd} failed:`, e);
+    return null;
+  }
+}
+
 // ============ DOM ============
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
@@ -41,6 +55,10 @@ const dom = {
   delaySlider: $('#delaySlider'),
   delayValue: $('#delayValue'),
   toast: $('#toast'),
+  engineToggle: $('.engine-toggle'),
+  engineDot: $('#engineDot'),
+  engineStatusText: $('#engineStatusText'),
+  engineBtnIcon: $('#engineBtnIcon'),
 };
 
 // ============ INIT ============
@@ -49,6 +67,7 @@ function init() {
   setupEvents();
   refreshUI();
   startClipboardWatch();
+  initEngine();
 }
 
 // ============ SETTINGS ============
@@ -74,12 +93,17 @@ function loadSettings() {
   $('#chkLang').checked = state.settings.lang === 'vi';
   $('#chkSkipEmpty').checked = state.settings.skipEmpty;
   dom.delaySlider.value = state.settings.delay;
-  dom.delayValue.textContent = state.settings.delay + ' sec';
+  updateDelayDisplay();
   dom.pasteKeyLabel.textContent = state.settings.pasteKey;
   dom.backKeyLabel.textContent = state.settings.backKey;
-  $('#btnHkPaste').textContent = state.settings.pasteKey;
-  $('#btnHkBack').textContent = state.settings.backKey;
-  $('#btnHkAuto').textContent = state.settings.autoKey;
+
+  // Hotkey kbd elements
+  const hkPaste = $('#btnHkPaste');
+  const hkBack = $('#btnHkBack');
+  const hkAuto = $('#btnHkAuto');
+  if (hkPaste) hkPaste.textContent = state.settings.pasteKey;
+  if (hkBack) hkBack.textContent = state.settings.backKey;
+  if (hkAuto) hkAuto.textContent = state.settings.autoKey;
 
   // Separator pills
   $$('.pill').forEach(p => {
@@ -95,12 +119,20 @@ function saveHistory() {
   localStorage.setItem('smartpaste_history', JSON.stringify(state.history.slice(0, 10)));
 }
 
+function updateDelayDisplay() {
+  const ms = Math.round(state.settings.delay * 1000);
+  dom.delayValue.textContent = ms + ' ms';
+}
+
 // ============ EVENTS ============
 function setupEvents() {
   // Settings toggle
   $('#btnSettings').addEventListener('click', () => {
     dom.settingsView.classList.remove('hidden');
   });
+
+  // Engine toggle
+  $('#btnEngine').addEventListener('click', toggleEngine);
 
   $('#btnBack2Main').addEventListener('click', closeSettings);
   $('#btnDone').addEventListener('click', closeSettings);
@@ -131,7 +163,7 @@ function setupEvents() {
   // Delay slider
   dom.delaySlider.addEventListener('input', (e) => {
     state.settings.delay = parseFloat(e.target.value);
-    dom.delayValue.textContent = state.settings.delay + ' sec';
+    updateDelayDisplay();
     saveSettings();
   });
 
@@ -153,6 +185,18 @@ function setupEvents() {
   $('#btnLoadManual').addEventListener('click', loadManual);
   $('#closeHistory').addEventListener('click', () => $('#historyModal').classList.add('hidden'));
   $('#closeViewAll').addEventListener('click', () => $('#viewAllModal').classList.add('hidden'));
+
+  // Remap buttons (placeholder - show toast for now)
+  const remapBtns = ['btnRemapPaste', 'btnRemapBack', 'btnRemapAuto'];
+  remapBtns.forEach(id => {
+    const btn = $(`#${id}`);
+    if (btn) {
+      btn.addEventListener('click', () => {
+        showToast('🎹 Press a new key...');
+        // TODO: Implement hotkey remap via Tauri global-shortcut plugin
+      });
+    }
+  });
 
   // Modal backdrop close
   ['manualModal', 'historyModal', 'viewAllModal'].forEach(id => {
@@ -307,7 +351,6 @@ function loadManual() {
 }
 
 async function loadFromFile() {
-  // Use file input since we're in vanilla JS
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.txt,.csv,.tsv';
@@ -336,7 +379,6 @@ function copyToClipboard(text) {
 }
 
 function startClipboardWatch() {
-  // Check clipboard every 500ms for multi-line content
   setInterval(async () => {
     try {
       const text = await navigator.clipboard.readText();
@@ -432,14 +474,14 @@ function refreshUI() {
 
   // Ring color based on state
   if (state.isAutoPasting) {
-    dom.ringProgress.style.stroke = '#f59e0b';
-    dom.ringProgress.style.filter = 'drop-shadow(0 0 6px rgba(245,158,11,0.3))';
+    dom.ringProgress.style.stroke = '#f5a623';
+    dom.ringProgress.style.filter = 'drop-shadow(0 0 10px rgba(245,166,35,0.4))';
   } else if (done >= total && total > 0) {
-    dom.ringProgress.style.stroke = '#22c55e';
-    dom.ringProgress.style.filter = 'drop-shadow(0 0 6px rgba(34,197,94,0.3))';
+    dom.ringProgress.style.stroke = '#00d68f';
+    dom.ringProgress.style.filter = 'drop-shadow(0 0 10px rgba(0,214,143,0.4))';
   } else {
-    dom.ringProgress.style.stroke = '#3b82f6';
-    dom.ringProgress.style.filter = 'drop-shadow(0 0 6px rgba(59,130,246,0.3))';
+    dom.ringProgress.style.stroke = '#2d7ff9';
+    dom.ringProgress.style.filter = 'drop-shadow(0 0 10px rgba(45,127,249,0.4))';
   }
 
   // Badge
@@ -455,7 +497,7 @@ function refreshUI() {
     badge.innerHTML = '<span class="dot"></span> Complete';
   } else {
     badge.className = 'ring-badge active';
-    badge.innerHTML = '<span class="dot"></span> Ready';
+    badge.innerHTML = '<span class="dot"></span> Ready to Paste';
   }
 
   // Preview
@@ -478,7 +520,7 @@ function renderPreview() {
     html += `
       <div class="preview-item current">
         <div>
-          <div class="preview-item-label">Current</div>
+          <div class="preview-item-label">Line ${idx + 1} (Current)</div>
           <div class="preview-item-text">${escapeHtml(text)}</div>
         </div>
         <span class="arrow">→</span>
@@ -525,7 +567,7 @@ function playSound(freq, duration) {
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.frequency.value = freq;
-    gain.gain.value = 0.05;
+    gain.gain.value = 0.04;
     osc.start();
     osc.stop(ctx.currentTime + duration / 1000);
   } catch (e) { }
@@ -537,6 +579,68 @@ function truncate(str, len) {
 
 function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ============ ENGINE (AHK) CONTROL ============
+async function initEngine() {
+  // Check if AHK is already running
+  if (isTauri) {
+    const running = await tauriInvoke('check_ahk_status');
+    state.engineRunning = !!running;
+  }
+  updateEngineUI();
+
+  // Poll status every 3s
+  setInterval(async () => {
+    if (isTauri) {
+      const running = await tauriInvoke('check_ahk_status');
+      if (state.engineRunning !== !!running) {
+        state.engineRunning = !!running;
+        updateEngineUI();
+      }
+    }
+  }, 3000);
+}
+
+async function toggleEngine() {
+  if (state.engineRunning) {
+    // Stop AHK
+    const result = await tauriInvoke('kill_ahk');
+    state.engineRunning = false;
+    showToast('⏹ Engine stopped');
+    playSound(600, 100);
+  } else {
+    // Start AHK
+    const result = await tauriInvoke('launch_ahk');
+    if (result && !result.includes('Failed')) {
+      state.engineRunning = true;
+      showToast('⚡ Engine started');
+      playSound(1200, 80);
+    } else {
+      showToast('❌ Failed to start engine');
+      // If not in Tauri, just toggle visually for demo
+      if (!isTauri) {
+        state.engineRunning = !state.engineRunning;
+      }
+    }
+  }
+  updateEngineUI();
+}
+
+function updateEngineUI() {
+  const toggle = dom.engineToggle;
+  const statusText = dom.engineStatusText;
+  const btnIcon = dom.engineBtnIcon;
+
+  if (state.engineRunning) {
+    toggle.classList.add('active');
+    statusText.textContent = 'Running';
+    btnIcon.textContent = '⏹';
+  } else {
+    toggle.classList.remove('active');
+    statusText.textContent = 'Stopped';
+    btnIcon.textContent = '▶';
+  }
 }
 
 // ============ START ============
